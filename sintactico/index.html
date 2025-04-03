@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Juego de Palabras de Tirso</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+      margin: 0;
+      background: linear-gradient(135deg, #f9f9f9, #e0f7fa);
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    h1 {
+      color: #00796b;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .word-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      margin-bottom: 20px;
+      width: 100%;
+      max-width: 700px;
+    }
+
+    .word {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: white;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.3s;
+      min-width: 80px;
+      touch-action: manipulation;
+    }
+
+    .word span {
+      font-size: 1.1em;
+      margin-bottom: 5px;
+    }
+
+    select {
+      font-size: 1em;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      touch-action: manipulation;
+    }
+
+    .correct {
+      background-color: #c8e6c9 !important;
+    }
+
+    .incorrect {
+      background-color: #ffcdd2 !important;
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #00796b;
+      color: white;
+      cursor: pointer;
+      margin: 10px;
+      touch-action: manipulation;
+    }
+
+    button:hover {
+      background-color: #004d40;
+    }
+
+    #feedback {
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 1.2em;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Juego de Palabras de Tirso</h1>
+  <p>Toca cada palabra y elige su tipo:</p>
+  <div class="word-container" id="sentence"></div>
+  <div>
+    <button onclick="checkAnswers()">Comprobar respuestas</button>
+    <button onclick="loadNewSentence()">Otra frase</button>
+  </div>
+  <div id="feedback"></div>
+
+  <script>
+    const sentences = 
+    [
+  [
+    {
+      "word": "Rápido",
+      "type": "adjetivo"
+    },
+    {
+      "word": "corre",
+      "type": "verbo"
+    },
+    {
+      "word": "el",
+      "type": "determinante"
+    },
+    {
+      "word": "niño",
+      "type": "nombre"
+    }
+  ],
+  [
+    {
+      "word": "Grande",
+      "type": "adjetivo"
+    },
+    {
+      "word": "es",
+      "type": "verbo"
+    },
+    {
+      "word": "la",
+      "type": "determinante"
+    },
+    {
+      "word": "casa",
+      "type": "nombre"
+    }
+  ],
+  [
+    {
+      "word": "Canta",
+      "type": "verbo"
+    },
+    {
+      "word": "bonito",
+      "type": "adjetivo"
+    },
+    {
+      "word": "mi",
+      "type": "determinante"
+    },
+    {
+      "word": "hermana",
+      "type": "nombre"
+    }
+  ],
+  [
+    {
+      "word": "Vuela",
+      "type": "verbo"
+    },
+    {
+      "word": "alto",
+      "type": "adjetivo"
+    },
+    {
+      "word": "el",
+      "type": "determinante"
+    },
+    {
+      "word": "avión",
+      "type": "nombre"
+    }
+  ],
+  [
+    {
+      "word": "La",
+      "type": "determinante"
+    },
+    {
+      "word": "luna",
+      "type": "nombre"
+    },
+    {
+      "word": "blanca",
+      "type": "adjetivo"
+    },
+    {
+      "word": "brilla",
+      "type": "verbo"
+    }
+  ],
+  [
+    {
+      "word": "Feliz",
+      "type": "adjetivo"
+    },
+    {
+      "word": "está",
+      "type": "verbo"
+    },
+    {
+      "word": "mi",
+      "type": "determinante"
+    },
+    {
+      "word": "perro",
+      "type": "nombre"
+    }
+  ],
+  [
+    {
+      "word": "Canta",
+      "type": "verbo"
+    },
+    {
+      "word": "la",
+      "type": "determinante"
+    },
+    {
+      "word": "niña",
+      "type": "nombre"
+    },
+    {
+      "word": "alegre",
+      "type": "adjetivo"
+    }
+  ],
+  [
+    {
+      "word": "Es",
+      "type": "verbo"
+    },
+    {
+      "word": "mi",
+      "type": "determinante"
+    },
+    {
+      "word": "hermano",
+      "type": "nombre"
+    },
+    {
+      "word": "fuerte",
+      "type": "adjetivo"
+    }
+  ],
+  [
+    {
+      "word": "Verde",
+      "type": "adjetivo"
+    },
+    {
+      "word": "es",
+      "type": "verbo"
+    },
+    {
+      "word": "el",
+      "type": "determinante"
+    },
+    {
+      "word": "campo",
+      "type": "nombre"
+    }
+  ],
+  [
+    {
+      "word": "Brilla",
+      "type": "verbo"
+    },
+    {
+      "word": "la",
+      "type": "determinante"
+    },
+    {
+      "word": "estrella",
+      "type": "nombre"
+    },
+    {
+      "word": "fuerte",
+      "type": "adjetivo"
+    }
+  ],
+  [
+    {
+      "word": "Azul",
+      "type": "adjetivo"
+    },
+    {
+      "word": "es",
+      "type": "verbo"
+    },
+    {
+      "word": "mi",
+      "type": "determinante"
+    },
+    {
+      "word": "camisa",
+      "type": "nombre"
+    }
+  ],
+  [
+    {
+      "word": "Mi",
+      "type": "determinante"
+    },
+    {
+      "word": "padre",
+      "type": "nombre"
+    },
+    {
+      "word": "trabaja",
+      "type": "verbo"
+    },
+    {
+      "word": "duro",
+      "type": "adjetivo"
+    }
+  ],
+  [
+    {
+      "word": "Pequeño",
+      "type": "adjetivo"
+    },
+    {
+      "word": "es",
+      "type": "verbo"
+    },
+    {
+      "word": "el",
+      "type": "determinante"
+    },
+    {
+      "word": "ratón",
+      "type": "nombre"
+    }
+  ],
+  [
+    {
+      "word": "Corre",
+      "type": "verbo"
+    },
+    {
+      "word": "mi",
+      "type": "determinante"
+    },
+    {
+      "word": "amiga",
+      "type": "nombre"
+    },
+    {
+      "word": "rápido",
+      "type": "adjetivo"
+    }
+  ],
+  [
+    {
+      "word": "Hermosa",
+      "type": "adjetivo"
+    },
+    {
+      "word": "es",
+      "type": "verbo"
+    },
+    {
+      "word": "una",
+      "type": "determinante"
+    },
+    {
+      "word": "rosa",
+      "type": "nombre"
+    }
+  ],
+  [
+    {
+      "word": "Limpia",
+      "type": "adjetivo"
+    },
+    {
+      "word": "está",
+      "type": "verbo"
+    },
+    {
+      "word": "la",
+      "type": "determinante"
+    },
+    {
+      "word": "ventana",
+      "type": "nombre"
+    }
+  ],
+  [
+    {
+      "word": "Rojo",
+      "type": "adjetivo"
+    },
+    {
+      "word": "es",
+      "type": "verbo"
+    },
+    {
+      "word": "el",
+      "type": "determinante"
+    },
+    {
+      "word": "tomate",
+      "type": "nombre"
+    }
+  ],
+  [
+    {
+      "word": "Suave",
+      "type": "adjetivo"
+    },
+    {
+      "word": "flota",
+      "type": "verbo"
+    },
+    {
+      "word": "una",
+      "type": "determinante"
+    },
+    {
+      "word": "nube",
+      "type": "nombre"
+    }
+  ],
+  [
+    {
+      "word": "Trabaja",
+      "type": "verbo"
+    },
+    {
+      "word": "duro",
+      "type": "adjetivo"
+    },
+    {
+      "word": "mi",
+      "type": "determinante"
+    },
+    {
+      "word": "tía",
+      "type": "nombre"
+    }
+  ]
+];
+
+    const types = ["nombre", "adjetivo", "verbo", "determinante"];
+
+    function loadNewSentence() {
+      const container = document.getElementById("sentence");
+      container.innerHTML = "";
+      document.getElementById("feedback").textContent = "";
+
+      const sentenceData = sentences[Math.floor(Math.random() * sentences.length)];
+
+      sentenceData.forEach((item, index) => {
+        const wordDiv = document.createElement("div");
+        wordDiv.className = "word";
+        wordDiv.dataset.correct = item.type;
+
+        const span = document.createElement("span");
+        span.textContent = item.word;
+        wordDiv.appendChild(span);
+
+        const select = document.createElement("select");
+        select.dataset.index = index;
+        types.forEach(t => {
+          const option = document.createElement("option");
+          option.value = t;
+          option.textContent = t;
+          select.appendChild(option);
+        });
+        wordDiv.appendChild(select);
+
+        container.appendChild(wordDiv);
+      });
+    }
+
+    function checkAnswers() {
+      const wordDivs = document.querySelectorAll(".word");
+      let correctCount = 0;
+
+      wordDivs.forEach(div => {
+        const select = div.querySelector("select");
+        if (select.value === div.dataset.correct) {
+          div.classList.remove("incorrect");
+          div.classList.add("correct");
+          correctCount++;
+        } else {
+          div.classList.remove("correct");
+          div.classList.add("incorrect");
+        }
+      });
+
+      const feedback = document.getElementById("feedback");
+      if (correctCount === wordDivs.length) {
+        feedback.textContent = "¡Muy bien! Todas las respuestas son correctas.";
+        feedback.style.color = "#2e7d32";
+      } else {
+        feedback.textContent = `Has acertado ${correctCount} de ${wordDivs.length} palabras.`;
+        feedback.style.color = "#f57c00";
+      }
+    }
+
+    loadNewSentence();
+  </script>
+</body>
+</html>

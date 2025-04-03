@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Juego de Tablas de Multiplicar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #ffeaa7, #fab1a0);
+      text-align: center;
+      padding: 20px;
+      margin: 0;
+    }
+    h1 {
+      font-size: 2.5em;
+      color: #d63031;
+      margin-bottom: 20px;
+    }
+    #question {
+      font-size: 1.8em;
+      margin: 20px 0;
+    }
+    .answer {
+      background-color: #74b9ff;
+      border: none;
+      padding: 15px 20px;
+      margin: 10px;
+      font-size: 1.3em;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      width: 80%;
+      max-width: 300px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .answer:hover, .answer:active {
+      background-color: #0984e3;
+      transform: scale(1.05);
+    }
+    .feedback {
+      font-size: 1.5em;
+      margin: 20px;
+      transition: transform 0.3s ease;
+    }
+    .correct {
+      color: green;
+      animation: pop 0.5s ease;
+    }
+    .incorrect {
+      color: red;
+      animation: shake 0.5s ease;
+    }
+    #score {
+      font-size: 1.8em;
+      margin-top: 30px;
+    }
+    #trophy {
+      font-size: 3em;
+      margin-top: 20px;
+    }
+    #start {
+      background-color: #55efc4;
+      font-size: 1.5em;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 20px auto;
+      display: block;
+    }
+    #progress-container {
+      width: 90%;
+      max-width: 600px;
+      height: 20px;
+      background-color: #dfe6e9;
+      border-radius: 10px;
+      margin: 20px auto;
+      overflow: hidden;
+    }
+    #progress-bar {
+      height: 100%;
+      background-color: #00b894;
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+    @keyframes pop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2em;
+      }
+      .answer {
+        font-size: 1.2em;
+      }
+      #start {
+        font-size: 1.2em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>🎉 Juego de Multiplicación 🎉</h1>
+  <div id="game">
+    <button id="start">Comenzar Partida</button>
+    <div id="question-container" style="display:none;">
+      <div id="progress-container">
+        <div id="progress-bar"></div>
+      </div>
+      <div id="question"></div>
+      <div id="answers"></div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+    <div id="score"></div>
+    <div id="trophy"></div>
+  </div>
+
+  <audio id="correct-sound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3" preload="auto"></audio>
+  <audio id="incorrect-sound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3" preload="auto"></audio>
+
+  <script>
+    const startBtn = document.getElementById('start');
+    const questionContainer = document.getElementById('question-container');
+    const questionEl = document.getElementById('question');
+    const answersEl = document.getElementById('answers');
+    const feedbackEl = document.getElementById('feedback');
+    const scoreEl = document.getElementById('score');
+    const trophyEl = document.getElementById('trophy');
+    const progressBar = document.getElementById('progress-bar');
+    const correctSound = document.getElementById('correct-sound');
+    const incorrectSound = document.getElementById('incorrect-sound');
+
+    let currentQuestion = 0;
+    let score = 0;
+    let questions = [];
+    let buttonsDisabled = false;
+
+    startBtn.addEventListener('click', startGame);
+
+    function startGame() {
+      startBtn.style.display = 'none';
+      score = 0;
+      currentQuestion = 0;
+      questions = generateQuestions();
+      scoreEl.textContent = '';
+      trophyEl.textContent = '';
+      questionContainer.style.display = 'block';
+      updateProgressBar();
+      showQuestion();
+    }
+
+    function generateQuestions() {
+      let qs = [];
+      while (qs.length < 20) {
+        let a = Math.floor(Math.random() * 9) + 1;
+        let b = Math.floor(Math.random() * 9) + 1;
+        let correct = a * b;
+        if (!qs.some(q => q.question === `${a} x ${b}`)) {
+          let answers = [correct];
+          while (answers.length < 4) {
+            let wrong = Math.floor(Math.random() * 81) + 1;
+            if (!answers.includes(wrong)) {
+              answers.push(wrong);
+            }
+          }
+          answers.sort(() => Math.random() - 0.5);
+          qs.push({
+            question: `${a} x ${b}`,
+            correct: correct,
+            answers: answers
+          });
+        }
+      }
+      return qs;
+    }
+
+    function showQuestion() {
+      feedbackEl.textContent = '';
+      buttonsDisabled = false;
+      const q = questions[currentQuestion];
+      questionEl.textContent = `❓ ¿Cuánto es ${q.question}?`;
+      answersEl.innerHTML = '';
+      q.answers.forEach(answer => {
+        const btn = document.createElement('button');
+        btn.classList.add('answer');
+        btn.textContent = answer;
+        btn.onclick = () => {
+          if (!buttonsDisabled) selectAnswer(answer);
+        };
+        answersEl.appendChild(btn);
+      });
+    }
+
+    function selectAnswer(answer) {
+      buttonsDisabled = true;
+      const q = questions[currentQuestion];
+      if (answer === q.correct) {
+        score++;
+        feedbackEl.textContent = '✅ ¡Correcto! 😊';
+        feedbackEl.className = 'feedback correct';
+        correctSound.play();
+      } else {
+        feedbackEl.textContent = `❌ Incorrecto 😢. La respuesta correcta era ${q.correct}`;
+        feedbackEl.className = 'feedback incorrect';
+        incorrectSound.play();
+      }
+      currentQuestion++;
+      updateProgressBar();
+      if (currentQuestion < 20) {
+        setTimeout(showQuestion, 2000);
+      } else {
+        setTimeout(showScore, 2500);
+      }
+    }
+
+    function updateProgressBar() {
+      const percentage = (currentQuestion / 20) * 100;
+      progressBar.style.width = percentage + '%';
+    }
+
+    function showScore() {
+      questionContainer.style.display = 'none';
+      scoreEl.innerHTML = `🎯 ¡Juego terminado! Has acertado <strong>${score}</strong> de 20 preguntas.`;
+
+      if (score >= 18) {
+        trophyEl.innerHTML = '🏆🏆🏆 <br><strong>¡Eres un maestro de las tablas! 🧠</strong>';
+      } else if (score >= 13) {
+        trophyEl.innerHTML = '🏆🏆 <br><strong>¡Muy bien! ¡Sigue practicando!</strong>';
+      } else if (score >= 7) {
+        trophyEl.innerHTML = '🏆 <br><strong>¡Buen intento! ¡Tú puedes mejorar!</strong>';
+      } else {
+        trophyEl.innerHTML = '🎖️ <br><strong>¡No te rindas! ¡A seguir aprendiendo!</strong>';
+      }
+
+      startBtn.textContent = 'Jugar de Nuevo';
+      startBtn.style.display = 'inline-block';
+    }
+  </script>
+</body>
+</html>
